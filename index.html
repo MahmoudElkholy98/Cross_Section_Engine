@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>kai engine</title>
+
+	<meta charset="UTF-8">
+
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+
+<canvas id="glcanvas" width="1280" height="720"></canvas>
+	<ul id="tools">
+		<li id="slice-tool-list" onclick="startSlicing()">
+			<div id="tool-list-label-slice" class="tool-list-label">Slice</div>
+		</li>
+
+		<br>
+
+		<li id="download-tool-list" onclick="downloadObject()">
+			<div id="tool-list-label-download" class="tool-list-label">Download</div>
+		</li>
+		
+		<br>
+
+		<li id="add-tool-list">
+			<div class="tool-list-label" onclick="showTools('add')">Add</div>
+		
+			<div id="add-tools">
+				<div id="addCubebBtn" class="add-tool-btns" onclick="addObject('cube')">Cube</div>
+				<!-- to commit -->
+				<!-- <div id="addPyramidBtn" class="add-tool-btns" onclick="addObject('pyramid')">Pyramid</div> -->
+				<div id="addCylinderBtn" class="add-tool-btns" onclick="addObject('cylinder')">Cylinder</div>
+				<div id="addSphereBtn" class="add-tool-btns" onclick="addObject('sphere')">Sphere</div>
+
+				<div id="add-import-btn" class="add-tool-btns" onclick="addImported()">Import</div>
+				<input id="fileInput" style="display: none;" type="file">
+			</div>
+		</li>
+
+
+		<li id="transform-tool-list">
+			<div class="tool-list-label" onclick="showTools('transform')">Transform</div>
+			
+			<div id="transform-tools">
+				<div id="transform-tools-options">
+					<div id="transform-tools-option-translate" onclick="showTransformTools('translate')">Translate</div>
+					<div id="transform-tools-option-scale" onclick="showTransformTools('scale')">Scale</div>
+					<div id="transform-tools-option-rotate" onclick="showTransformTools('rotate')">Rotate</div>
+				</div>
+
+				<div id="translate-box">
+					<div><span onmousedown="translateBtnDown('x', 1)" onmouseup="translateBtnUp()" class="translate-btns">X+</span> <span onmousedown="translateBtnDown('x', -1)" onmouseup="translateBtnUp()" class="translate-btns">X-</span></div>
+					<div><span onmousedown="translateBtnDown('y', 1)" onmouseup="translateBtnUp()" class="translate-btns">Y+</span> <span onmousedown="translateBtnDown('y', -1)" onmouseup="translateBtnUp()" class="translate-btns">Y-</span></div>
+					<div><span onmousedown="translateBtnDown('z', 1)" onmouseup="translateBtnUp()" class="translate-btns">Z+</span> <span onmousedown="translateBtnDown('z', -1)" onmouseup="translateBtnUp()" class="translate-btns">Z-</span></div>
+					
+					<div id="center-btn" onclick="centerTool()">Center</div>
+				</div>
+
+				<div id="scale-box">	
+					<div class="scale-tool-types">
+						<input id="scale-uniform-btn" onchange="scaleTypeChange()" type="radio" name="scale" value="uniform" checked><span class="scale-tool-type-label">Uniform</span>
+						
+						<input id="uniform-scale-input" onchange="scaleTool(this.value, this.value, this.value)" onkeyup="scaleApply('xyz', this.value, event)" type="number" value="1" step="0.1">
+					</div>
+
+					<div class="scale-tool-types">
+						<input id="scale-nonuniform-btn" onchange="scaleTypeChange()" type="radio" name="scale" value="non-uniform"><span class="scale-tool-type-label">NonUniform</span>
+						
+						<div class="nonuniform-scale-input">
+							<span>X:</span>
+							<input id="nonuniform-scale-input-x" onchange="scaleTool(this.value, null, null)" onkeyup="scaleApply('x', this.value, event)" type="number" value="1" step="0.1" disabled>
+						</div>
+						<div class="nonuniform-scale-input">
+							<span>Y:</span>
+							<input id="nonuniform-scale-input-y" onchange="scaleTool(null, this.value, null)" onkeyup="scaleApply('y', this.value, event)" type="number" value="1" step="0.1" disabled>
+						</div>
+						<div class="nonuniform-scale-input">
+							<span>Z:</span>
+							<input id="nonuniform-scale-input-z" onchange="scaleTool(null, null, this.value)" onkeyup="scaleApply('z', this.value, event)" type="number" value="1" step="0.1" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div id="rotate-box">
+					<div>
+						<span>X:</span>
+						<input id="rotate-input-x" type="number" value="0" step="0.1">
+					</div>
+					<div>
+						<span>Y:</span>
+						<input id="rotate-input-y" type="number" value="0" step="0.1">
+					</div>
+					<div>
+						<span>Z:</span>
+						<input id="rotate-input-z" type="number" value="0" step="0.1">
+					</div>
+
+					
+					<div id="rotate-apply-btn" onclick="rotateApply()">Apply</div>
+				</div>
+			</div>				
+		</li>
+
+		<!-- <li id="add-tool-list">
+			<div class="tool-list-label" onclick="showTools('add')">Add</div>
+
+			<div>
+				<li id="subtract-tool-btn" onclick="subtractTool()">Subtract</li>
+				<li id="union-tool-btn" onclick="unionTool()">Union</li>
+				<li id="union-tool-btn" onclick="intersectTool()">Intersect</li>
+			</div>
+		</li> -->
+
+		
+
+		<li id="delete-tool-list" onclick="deleteTool()">Delete</li>
+
+		<br>
+
+		<!-- to commit -->
+		<li id="infill-tool-list">
+			<div class="tool-list-label" onclick="showTools('infill')">Infill</div>
+		
+			<div id="infill-tools">
+				<div>
+					<span class="infill-labels">Thickness Density</span>
+					<input id="infill-thickness-density-input" type="number" value="10" steps="10">
+					<span class="infill-units">%</span>
+				</div>
+
+				<div>
+					<span class="infill-labels">Infill Thickness</span>
+					<input id="infill-thickness-input" type="number" value="0.5" steps="0.1">
+					<span class="infill-units">mm</span>
+				</div>
+
+				<div>
+					<span class="infill-labels">Offset Thickness</span>
+					<input id="infill-offset-thickness-input" type="number" value="0.5" steps="0.1">
+					<span class="infill-units">mm</span>
+				</div>
+
+				<div>
+					<span class="infill-labels">Top Solid Layers</span>
+					<input id="infill-top-layers-input" type="number" value="10" steps="1">
+					<span class="infill-units">Layers</span>
+				</div>
+
+				<div>
+					<span class="infill-labels">Base Solid Layers</span>
+					<input id="infill-base-layers-input" type="number" value="10" steps="1">
+					<span class="infill-units">Layers</span>
+				</div>
+			</div>
+		</li>
+
+		<!-- <br>
+		<li id="view-mode-tool">
+			<p>View</p>
+			<span class="view-mode-btn" onclick="viewModeTool(0)">Default</span>
+			<br>
+			<span class="view-mode-btn" onclick="viewModeTool(1)">Front</span>
+			<span class="view-mode-btn" onclick="viewModeTool(2)">Back</span>
+			<br>
+			<span class="view-mode-btn" onclick="viewModeTool(3)">Top</span>
+			<span class="view-mode-btn" onclick="viewModeTool(4)">Bottom</span>
+			<br>
+			<span class="view-mode-btn" onclick="viewModeTool(5)">Right</span>
+			<span class="view-mode-btn" onclick="viewModeTool(6)">Left</span>
+		</li> -->
+	</ul>
+
+	<!-- <span id="choose-object-hint" class="pulse">Choose an Object for the Operation</span>
+	<ul id="current-objects"></ul> -->
+
+	<!-- <div id="object-dimensions">
+		<span>Width: </span>
+		<span>Height: </span>
+		<span>Length: </span>
+	</div> -->
+
+	<div id="test" style="position: absolute;"></div>
+
+	<div id="slider-handle-plus" onclick="sliderHandlePlus()">+</div>
+	
+	<div id="slider"></div>
+
+	<div id="slider-handle-minus" onclick="sliderHandleMinus()">-</div>
+
+	<!-- to commit  -->
+	<div id="slider-slicer-handle" onmousedown="handleDown(-1)"></div>	
+
+	<!-- to commit  -->
+	<div id="slider-layer-number"></div>
+
+	<div id="slider-layers-box">
+		<div id="slider-layers-types-tabs">
+			<div id="slider-layers-types-normal" onclick="selectLayerType(0)" class="slider-layers-types-tab">Normal</div>
+			<div id="slider-layers-types-sequential" onclick="selectLayerType(1)" class="slider-layers-types-tab">Sequential</div>
+			<div id="slider-layers-types-continuous" onclick="selectLayerType(2)" class="slider-layers-types-tab">Continuous</div>
+		</div>
+
+		<div id="slider-layers-data-normal" class="slider-layers-data">
+			<div>
+				<span class="slider-layers-input-label">Exposure time</span>
+				<input id="normal-exposure-time-input" type="number" value="2000" class="slider-layers-input">
+				<span class="slider-layers-input-unit">msec</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Retract Speed</span>
+				<input id="normal-retract-speed-input" type="number" value="150" class="slider-layers-input">
+				<span class="slider-layers-input-unit">mm/min</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Peeling Speed</span>
+				<input id="normal-peeling-speed-input" type="number" value="25" class="slider-layers-input">
+				<span class="slider-layers-input-unit">mm/min</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Peeling Dist.</span>
+				<input id="normal-peeling-dist-input" type="number" value="25" class="slider-layers-input">
+				<span class="slider-layers-input-unit">mm</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Thickness</span>
+				<input id="normal-thickness-input" type="number" value="100" class="slider-layers-input">
+				<span class="slider-layers-input-unit">μm</span>
+			</div>
+
+			<span class="slider-layers-apply-btn" onclick="setSliderLayers(activeHandleIndex, 0)">Apply</span>
+		</div>
+
+		<div id="slider-layers-data-sequential" class="slider-layers-data">
+			<div>
+				<span class="slider-layers-input-label">Exposure time</span>
+				<input id="sequential-exposure-time-input" type="number" value="2000" class="slider-layers-input">
+				<span class="slider-layers-input-unit">msec</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Speed</span>
+				<input id="sequential-speed-input" type="number" value="150" class="slider-layers-input">
+				<span class="slider-layers-input-unit">mm/min</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Thickness</span>
+				<input id="sequential-thickness-input" type="number" value="100" class="slider-layers-input">
+				<span class="slider-layers-input-unit">μm</span>
+			</div>
+
+			<span class="slider-layers-apply-btn" onclick="setSliderLayers(activeHandleIndex, 1)">Apply</span>
+		</div>
+
+		<div id="slider-layers-data-continuous" class="slider-layers-data">
+			<div>
+				<span class="slider-layers-input-label">Speed</span>
+				<input id="continuous-speed-input" type="number" value="150" class="slider-layers-input">
+				<span class="slider-layers-input-unit">mm/min</span>
+			</div>
+			<div>
+				<span class="slider-layers-input-label">Thickness</span>
+				<input id="continuous-thickness-input" type="number" value="100" class="slider-layers-input">
+				<span class="slider-layers-input-unit">μm</span>
+			</div>
+
+			<span class="slider-layers-apply-btn" onclick="setSliderLayers(activeHandleIndex, 2)">Apply</span>
+		</div>
+	</div>
+
+	<div id="transform-apply" onclick="applySceneMode()">Apply</div>
+
+	<div id="popup">
+		<div id="popup-box">
+			<div id="popup-box-closeBtn" onclick="hidePopup(event, true)">X</div>
+
+			<div id="popup-box-msg"></div>
+		</div>
+	</div>
+
+	<div id="wrap">
+		<div id="cube-home" onclick="changeViewMode('home');"><img src="css/images/homeicon.png"></div>
+
+		<div id="cube-arrow-left" onclick="changeViewMode('none', 'left');"><img src="css/images/arrowleft.png"></div>
+		<div id="cube-arrow-right" onclick="changeViewMode('none', 'right');"><img src="css/images/arrowright.png"></div>
+
+		<div id="cube">
+			<div class="front" onclick="changeViewMode('front');">front</div>
+			<div class="back">back</div>
+			
+			<div class="top" onclick="changeViewMode('top');">top</div>
+			<div class="bottom">bottom</div>
+			
+			<div class="left" onclick="changeViewMode('left');">left</div>
+			<div class="right">right</div>
+		</div>
+	</div>
+
+<script type="text/javascript" src="3rd party libraries/gl-matrix-min.js"></script>
+<script type="text/javascript" src="3rd party libraries/csg.js"></script>
+<script type="text/javascript" src="3rd party libraries/jszip.min.js"></script>
+<script type="text/javascript" src="3rd party libraries/filesaver.min.js"></script>
+<script type="text/javascript" src="Global Stuff/GlobalVariables.js"></script>
+<script type="text/javascript" src="Core/CanvasManager.js"></script>
+<script type="text/javascript" src="Core/InputManager.js"></script>
+
+<script type="text/javascript" src="Math/generalMath.js"></script>
+<script type="text/javascript" src="Math/vector2.js"></script>
+<script type="text/javascript" src="Math/vector3.js"></script>
+<script type="text/javascript" src="Math/vector4.js"></script>
+<script type="text/javascript" src="Math/quaternion.js"></script>
+<script type="text/javascript" src="Math/matrix4.js"></script>
+<script type="text/javascript" src="Math/plane.js"></script>
+
+<script type="text/javascript" src="Graphics/viewport manager.js"></script>
+<script type="text/javascript" src="Graphics/mesh.js"></script>
+<script type="text/javascript" src="Graphics/shader.js"></script>
+<script type="text/javascript" src="Graphics/camera.js"></script>
+<script type="text/javascript" src="Graphics/transform.js"></script>
+<script type="text/javascript" src="Graphics/renderer.js"></script>
+<script type="text/javascript" src="Graphics/BasicShader.js"></script>
+<script type="text/javascript" src="Graphics/DirectionalShader.js"></script>
+<script type="text/javascript" src="Graphics/screen shader.js"></script>
+<script type="text/javascript" src="Graphics/slicer shader.js"></script>
+<script type="text/javascript" src="Graphics/world cube shader.js"></script>
+<script type="text/javascript" src="Graphics/slicer.js"></script>
+<script type="text/javascript" src="Graphics/guiEffects.js"></script>
+<script type="text/javascript" src="qt/qt.js"></script>
+
+<script type="text/javascript">
+	
+	var directionalShader;
+	var basicShader;
+	var screenShader;
+
+	var slicer;
+	var slicerShader;
+
+	var cuboid1;
+	var trans1;
+
+	function initWorld()
+	{
+		canvasManager = new canvas(document.getElementById("glcanvas"));
+		canvasManager.init();
+		inputManager = new InputManager('glcanvas');
+		
+		viewportManager = new ViewportManager();
+		viewportManager.addViewport(new viewport(0, 0, canvasManager.width, canvasManager.height), "first");
+		// viewportManager.addViewport(new viewport(0, 0, 100, 100), "second");
+		// viewportManager.addViewport(new viewport(0, 0, 960, 540), "second");
+		viewportManager.addViewport(new viewport(0, 0, 1280, 720), "second");
+		viewportManager.activateViewport("first");
+		
+		renderer = new renderer();
+		renderer.setMainCamera(new camera(new vector3(0, 150, 350)
+										, new vector3(0, -0.4, -1)
+										, new vector3(0, -1, 0)
+										, new vector3(1, 1, 1)
+										, 'perspective'
+										, true));
+
+		var aspect = canvasManager.width / canvasManager.height; 
+
+		renderer.mainCamera.setPerspective(30.0
+										 , aspect
+										 , 0.1
+										 , 10000.0);
+
+		renderer.mainCamera.setOrthographic(canvasManager.width
+										 	, canvasManager.height
+										 	, 0.1
+										 	, 10000.0);
+
+		directionalShader = new DirectionalShader();
+		directionalShader.init();
+
+		basicShader = new BasicShader();
+		basicShader.init();
+
+		slicerShader =  new SlicerShader();
+		slicerShader.init();
+
+		screenShader =  new ScreenShader();
+		screenShader.init();
+
+		renderer.init();
+
+		var cam = new camera(new vector3(0, 0, 100)
+							, new vector3(0, 0, -1)
+							, new vector3(0, -1, 0)
+							, new vector3(2.5, 2.5, 2.5)
+							, 'ortho'
+							, false);
+
+		cam.setPerspective(30
+						 , aspect
+						 , 0.1
+						 , 10000.0);
+
+		cam.setOrthographic(viewportManager.activeViewport.width
+						 	, viewportManager.activeViewport.height
+						 	, -100	
+						 	, 1000.0);
+
+		slicer = new slicer();
+		slicer.init(slicerShader, basicShader, cam, renderer.mainCamera);
+
+		// renderer.addRenderable(new renderable(createCuboid(new vector3(), new vector3(30, 30, 30)), 
+		// 									new vector3(0, 0, 1), 
+		// 									new vector3(), 
+		// 									new transform()));	
+	}
+	
+	function run()
+	{
+		initWorld();
+		runInputManager();
+		var c = 0;
+		var loop = function()
+		{
+			var rot = new vector3(renderer.worldTransform.rotation.x, renderer.worldTransform.rotation.y, renderer.worldTransform.rotation.z);
+			var quat = new quaternion(renderer.worldTransform.rotationQuat.x, renderer.worldTransform.rotationQuat.y, renderer.worldTransform.rotationQuat.z, renderer.worldTransform.rotationQuat.w)
+
+			if (activateAutoSlice)
+			{
+				renderer.update();
+
+				canvasManager.setClearColor(0, 0, 0, 0);
+				viewportManager.activateViewport("second");
+				blaaaaaah(viewportManager.activeViewport.width, viewportManager.activeViewport.height);
+				canvasManager.clear("default");			
+				renderer.worldTransform.rotationQuat = new quaternion();
+				renderer.worldTransform.rotation = new vector3(90);
+				renderer.worldTransform.rotate(90, new vector3(1));
+				slicer.autoSliceScene(true, 'back');
+			}
+			
+			renderer.worldTransform.rotation = rot;
+			renderer.worldTransform.rotationQuat = quat;
+				
+			canvasManager.setClearColor(0.85, 0.85, 0.85, 1);
+			viewportManager.activateViewport("first");
+			blaaaaaah(viewportManager.activeViewport.width, viewportManager.activeViewport.height);
+			canvasManager.clear("default");
+			renderer.update();
+
+			slicer.renderVolume();
+			slicer.autoSliceScene(false, 'front');
+			
+			if (activateAutoSlice == false) 
+			{
+				slicer.renderSingle();
+			}
+
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
+	}
+
+	window.addEventListener('load',function()
+	{
+		run();
+		initGui();
+	});
+
+	window.addEventListener('resize', function(event)
+	{
+  		gl.canvas.width = window.innerWidth;
+		gl.canvas.height = window.innerHeight;
+
+		canvasManager.width = window.innerWidth;
+		canvasManager.height = window.innerHeight;
+
+		renderer.mainCamera.width = canvasManager.width;
+		renderer.mainCamera.height = canvasManager.height;
+		
+		slicer.sliceCamera.width = canvasManager.width;
+		slicer.sliceCamera.height = canvasManager.height;
+
+		slicer.tempCamera.width = canvasManager.width;
+		slicer.tempCamera.height = canvasManager.height;
+
+		slicer.canvas.width = canvasManager.width;
+		slicer.canvas.height = canvasManager.height;
+
+		// slicer.tempcanvas.width = canvasManager.width;
+		// slicer.tempcanvas.height = canvasManager.height;
+
+		viewportManager.activeViewport.width = canvasManager.width;
+		viewportManager.activeViewport.height = canvasManager.height;
+	});
+
+	function blaaaaaah(width, height)
+	{
+		gl.canvas.width = width;
+		gl.canvas.height = height;
+
+		canvasManager.width = width;
+		canvasManager.height = height;
+
+		renderer.mainCamera.width = width;
+		renderer.mainCamera.height = height;
+		
+		slicer.sliceCamera.width = width;
+		slicer.sliceCamera.height = height;
+
+		slicer.tempCamera.width = width;
+		slicer.tempCamera.height = height;
+
+		slicer.canvas.width = width;
+		slicer.canvas.height = height;
+
+		// slicer.tempcanvas.width = width;
+		// slicer.tempcanvas.height = height;
+
+		// slicer.tempcontext.canvas.width = width;
+		// slicer.tempcontext.canvas.height = height;
+	}
+
+
+</script>
+</body>
+</html>
